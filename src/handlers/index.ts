@@ -8,6 +8,7 @@ import { validateEvent } from "../middleware/validate-event";
 import { z } from "zod";
 import logger from "../utils/logger";
 import { addLogContext } from "../middleware/add-log-context";
+import { compose } from "../utils/compose";
 
 const eventSchema = z.object({
   body: z.string(),
@@ -26,6 +27,9 @@ export const handleCommand = async (
   };
 };
 
-export const handler = handleHttpErrors()(
-  validateEvent({ schema: eventSchema })(addLogContext()(handleCommand))
-);
+export const handler = compose(
+  handleCommand,
+  handleHttpErrors,
+  validateEvent({ schema: eventSchema}),
+  addLogContext
+)
